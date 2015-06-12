@@ -8,7 +8,7 @@ long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version '0.0.1'
 
 depends 'apt'
-depends 'nginx', '~> 3.0'
+depends 'nginx', '~> 2.7'
 depends 'chef-sugar'
 depends 'php', '~> 1.5'
 depends 'php-fpm', '~> 0.7'

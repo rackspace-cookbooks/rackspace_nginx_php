@@ -1,39 +1,58 @@
-shared_examples_for 'Apache2' do
-  it 'includes apache2 required recipes' do
-    expect(chef_run).to include_recipe('apache2::default')
-    expect(chef_run).to include_recipe('apache2::mod_fastcgi')
-    expect(chef_run).to include_recipe('apache2::mod_actions')
+shared_examples_for 'Nginx' do |enabled_suite, disabled_suite|
+  it 'includes nginx required recipes' do
+    expect(chef_run).to include_recipe('nginx::default')
   end
-end
-
-shared_examples_for 'Apache2 PHP handler' do |distro, apache_version|
-  conf_d_path = %w( centos ).include?(distro) ? '/etc/httpd/conf-available' : '/etc/apache2/conf-available'
-  it 'configures Apache2 to handle PHP with php-fpm' do
+  it 'creates the enabled site document root' do
+    expect(chef_run).to create_directory("/var/www/#{enabled_suite}").with(
+      owner: 'root',
+      group: 'root',
+      mode: '0755',
+      recursive: true
+    )
+  end
+  it 'does not create the disabled site document root' do
+    expect(chef_run).to_not create_directory("/var/www/#{disabled_suite}")
+  end
+  it 'creates the enabled site configuration' do
     [
-      'AddHandler php5-fcgi .php',
-      'Action php5-fcgi /php5-fcgi',
-      'Alias /php5-fcgi /var/run/php5-fcgi',
-      'FastCgiExternalServer /var/run/php5-fcgi -socket /var/run/php-fpm-www.sock -flush -idle-timeout 1800'
+      'server {',
+      'listen        80;',
+      'server_name   Fauxhai;',
+      "access_log    /var/log/nginx/#{enabled_suite}.access.log;",
+      "error_log     /var/log/nginx/#{enabled_suite}.error.log;",
+      'location / {',
+      'index   index.html index.htm;',
+      'location ~* \.php$ {',
+      'try_files       $uri = 404;',
+      'include         fastcgi_params;',
+      "fastcgi_pass    unix:/var/run/php-fpm-#{enabled_suite}.sock;",
+      'fastcgi_index   index.php;',
+      'fastcgi_param   SCRIPT_FILENAME  $document_root$fastcgi_script_name;'
     ].each do |line|
-      expect(chef_run).to render_file("#{conf_d_path}/php-handler.conf").with_content(line)
+      expect(chef_run).to render_file("/etc/nginx/sites-available/#{enabled_suite}.conf").with_content(line)
     end
   end
-  if apache_version == '2.4'
-    it 'sets the approriate Apache 2.4 configuration' do
-      [
-        '<Directory /var/run>',
-        'Require all granted',
-        '</Directory>'
-      ].each do |line|
-        expect(chef_run).to render_file("#{conf_d_path}/php-handler.conf").with_content(line)
-      end
-    end
+  it 'does not create the disabled site configuration' do
+    expect(chef_run).to_not render_file("/etc/nginx/sites-available/#{disabled_suite}.conf")
+  end
+  it 'enables the site' do
+    expect(chef_run).to enable_nginx_site("#{enabled_suite}")
   end
 end
 
-shared_examples_for 'PHP-FPM' do
+shared_examples_for 'PHP-FPM' do |platform, suite|
   it 'includes php-fpm default recipe' do
     expect(chef_run).to include_recipe('php-fpm::default')
+  end
+  it 'creates the default php-fpm pool' do
+    # We cannot test the php_fpm_pool as it is a definition not a resource
+    if platform == 'redhat'
+      expect(chef_run).to render_file("/etc/php-fpm.d/#{suite}.conf")
+    elsif platform == 'ubuntu'
+      expect(chef_run).to render_file("/etc/php5/fpm/pool.d/#{suite}.conf")
+    else
+      expect(chef_run).to render_file("/etc/php5/fpm/pool.d/#{suite}.conf")
+    end
   end
 end
 
@@ -46,9 +65,6 @@ end
 shared_examples_for 'APT php repo' do |version|
   it 'configures the appropriate repository' do
     expect(chef_run).to add_apt_repository("php-#{version}")
-  end
-  it 'disables Apache install from ondrej repos' do
-    expect(chef_run).to add_apt_preference('apache')
   end
 end
 

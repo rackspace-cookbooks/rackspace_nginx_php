@@ -7,14 +7,38 @@
 #
 include_recipe 'chef-sugar'
 
-# APACHE
-include_recipe 'apache2::mod_actions'
-include_recipe 'apache2::mod_fastcgi'
+# NGINX
+# Disable the default site from the upstream nginx cookbook.
+# We do that because the template source is hardcoded in upstream and we cannot override it.
+# We will create owr own.
+node.default['nginx']['default_site_enabled'] = false
 
-apache_conf 'php-handler' do
-  source node['rackspace_nginx_php']['php_handler']['template']
-  cookbook node['rackspace_nginx_php']['php_handler']['cookbook']
-  enable node['rackspace_nginx_php']['php_handler']['enable']
+include_recipe 'nginx'
+
+# Create the document root to use for the default site we create
+directory '/var/www/default' do
+  owner 'root'
+  group 'root'
+  mode '0755'
+  recursive true
+  action :create
+  only_if { node['rackspace_nginx_php']['nginx']['default_site']['enable'] }
+end
+
+# Configuration for our default site
+template "#{node['nginx']['dir']}/sites-available/default.conf" do
+  source node['rackspace_nginx_php']['nginx']['default_site']['template']
+  cookbook node['rackspace_nginx_php']['nginx']['default_site']['cookbook']
+  owner 'root'
+  group 'root'
+  mode '0644'
+  action :create
+  only_if { node['rackspace_nginx_php']['nginx']['default_site']['enable'] }
+end
+
+# Enable (or not) our default site
+nginx_site 'default.conf' do
+  enable node['rackspace_nginx_php']['nginx']['default_site']['enable']
 end
 
 # PHP-FPM
@@ -75,12 +99,6 @@ elsif platform_family?('debian')
     components   ['main']
     distribution node['lsb']['codename']
   end
-  # however we don't want apache from ondrej/php5
-  apt_preference 'apache' do
-    glob         '*apache*'
-    pin          'release o=Ubuntu'
-    pin_priority '600'
-  end
 end
 
 # ondrej repos doesn't support PHP 5.4 on Trusty
@@ -92,12 +110,29 @@ end
 # Set the correct php-fpm packages to install
 node.default['php-fpm']['package_name'] = php_fpm[node['platform_family']][node['rackspace_nginx_php']['php_version']]['php_fpm_package']
 node.default['php-fpm']['service_name'] = php_fpm[node['platform_family']][node['rackspace_nginx_php']['php_version']]['service']
+
+# Set the correct user for php-fpm
+node.default['php-fpm']['user'] = node['nginx']['user']
+node.default['php-fpm']['group'] = node['nginx']['group']
+
 include_recipe 'php-fpm::default'
+
+# Create (or not) our default pool
+php_fpm_pool 'default' do
+  enable node['rackspace_nginx_php']['php-fpm']['default_pool']['enable']
+end
+
+# On Centos 6 with PHP 5.4 the default php-fpm package creates its own 'www' pool to run under the 'apache' user.
+# This breaks the php-fpm::install recipe for us as it tries to start php-fpm before php-fpm::configure runs
+# which creates its own 'www' pool with the correct 'nginx' user.
+# The solution is to alter the resource in the resource collection.
+if node['platform_family']['rhel'] && node['rackspace_nginx_php']['php_version'] == '5.4'
+  resources('service[php-fpm]').action :enable # this is ':enable, :start' in the php-fpm::install recipe
+end
 
 # PHP
 # Set the correct php packages to install
 if node['rackspace_nginx_php']['php_packages_install']['enable']
-  Chef::Log.info 'XXXX installs XXXX'
   node.default['php']['packages'] = php_fpm[node['platform_family']][node['rackspace_nginx_php']['php_version']]['php_packages']
   include_recipe 'php::default'
   # Emptying php packages, to be sure if another cookbook tries to include php::default it
@@ -106,5 +141,5 @@ if node['rackspace_nginx_php']['php_packages_install']['enable']
 end
 
 # TODO
-# * downgrade / upgrade Apache if required
+# * downgrade / upgrade Nginx if required
 # Refactor mapping outside of the recipe

@@ -2,7 +2,7 @@
 
 # rackspace_nginx_php-cookbook
 
-A cookbook to provide a web server able to serve php pages with Apache and PHP fpm.
+A cookbook to provide a web server able to serve php pages with Nginx and PHP fpm.
 It relies on [apache2 cookbook](https://github.com/svanzoest-cookbooks/apache2/) and [php-fpm](https://github.com/yevgenko/cookbook-php-fpm). Those cookbooks are pinned on well known working minor version to prevent breaking changes.
 In addition (even if this is not a requirement), the cookbook will install php packages through [PHP cookbook](https://github.com/opscode-cookbooks/php). Indeed most of the time you will need `php::default` in your role which will conflict with the `php-fpm` package if they are different.
 You can disable the installation of php packages with `node['rackspace_nginx_php']['php_packages_install']['enable']`.
