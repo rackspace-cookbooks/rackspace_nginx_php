@@ -1,6 +1,6 @@
 shared_examples_for 'php with nginx' do |version, suite|
   describe command('wget -qO- localhost:80/phpinfo.php') do
-    index_php_path = "#{suite_family_value(suite, :docroot, os[:family].to_sym)}/phpinfo.php"
+    index_php_path = "#{get_helper_data_value(suite, :docroot)}/phpinfo.php"
     before do
       File.open(index_php_path, 'w') { |file| file.write('<?php phpinfo(); ?>') }
     end

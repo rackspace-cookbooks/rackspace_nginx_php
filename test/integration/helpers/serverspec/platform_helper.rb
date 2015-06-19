@@ -2,90 +2,90 @@
 set :backend, :exec
 set :path, '/sbin:/usr/local/sbin:/bin:/usr/bin:$PATH'
 
-def suite_family_values
-  suite_data = {
-    default: {
-      docroot: {
-        redhat:  '/var/www/default',
-        ubuntu:  '/var/www/default',
-        other:   '/var/www/default'
+def helper_data
+  # Define the data we need to test every suite per platform and release
+  # An attribute specific to a release but different across suites should go into >Family>Release>Suite>Attribute
+  # An attribute specific to a release but common across suites should go into >Family>Release>Common>Attribute
+  # An attribute common across releases but different across suites should go into >Family>Common>Suite>Attribute
+  # An attribute common across releases and suites should go into >Family>Common>Attribute
+  # An attribute common across releases and platforms but different across suites should go into >Common>Suite>Attribute
+  # An attribute common across releases, platforms and suites should go into >Common>Attribute
+
+  data = {
+    redhat: {
+      '6.6' => {
+        default: {
+          default_pool:         '/etc/php-fpm.d/default.conf',
+          fpm_socket:           '/var/run/php-fpm-default.sock'
+        },
+        override: {
+          default_pool:         '/etc/php-fpm.d/override.conf',
+          fpm_socket:           '/var/run/php-fpm-override.sock'
+        },
+        common: {
+          fpm_service_name:      'php-fpm'
+        }
       },
-      default_site: {
-        redhat:  '/etc/nginx/sites-available/default.conf',
-        ubuntu:  '/etc/nginx/sites-available/default.conf',
-        other:   '/etc/nginx/sites-available/default.conf'
-      },
-      default_site_enabled: {
-        redhat:  '/etc/nginx/sites-enabled/default.conf',
-        ubuntu:  '/etc/nginx/sites-enabled/default.conf',
-        other:   '/etc/nginx/sites-enabled/default.conf'
-      },
-      default_pool: {
-        redhat:  '/etc/php-fpm.d/default.conf',
-        ubuntu:  '/etc/php5/fpm/pool.d/default.conf',
-        other:   '/etc/php5/fpm/pool.d/default.conf'
-      },
-      fpm_service_name: {
-        redhat:  'php-fpm',
-        ubuntu:  'php5-fpm',
-        other:   'php5-fpm'
-      },
-      fpm_socket: {
-        redhat:  '/var/run/php-fpm-default.sock',
-        ubuntu:  '/var/run/php-fpm-default.sock',
-        other:   '/var/run/php-fpm-default.sock'
+      common: {
+        default: {},
+        override: {}
       }
     },
-    override: {
-      docroot: {
-        redhat:  '/var/www/override',
-        ubuntu:  '/var/www/override',
-        other:   '/var/www/override'
+    ubuntu: {
+      '12.04' => {
+        default: {},
+        override: {},
+        common: {}
       },
-      default_site: {
-        redhat:  '/etc/nginx/sites-available/override.conf',
-        ubuntu:  '/etc/nginx/sites-available/override.conf',
-        other:   '/etc/nginx/sites-available/override.conf'
+      '14.04' => {
+        default: {},
+        override: {},
+        common: {}
       },
-      default_site_enabled: {
-        redhat:  '/etc/nginx/sites-enabled/override.conf',
-        ubuntu:  '/etc/nginx/sites-enabled/override.conf',
-        other:   '/etc/nginx/sites-enabled/override.conf'
+      common: {
+        fpm_service_name:       'php5-fpm',
+        default: {
+          default_pool:         '/etc/php5/fpm/pool.d/default.conf',
+          fpm_socket:           '/var/run/php-fpm-default.sock'
+        },
+        override: {
+          default_pool:         '/etc/php5/fpm/pool.d/override.conf',
+          fpm_socket:           '/var/run/php-fpm-override.sock'
+        }
+      }
+    },
+    common: {
+      nginx:                    '/usr/sbin/nginx',
+      nginx_service_name:       'nginx',
+      default: {
+        docroot:                '/var/www/default',
+        default_site:           '/etc/nginx/sites-available/default.conf',
+        default_site_enabled:   '/etc/nginx/sites-enabled/default.conf'
       },
-      default_pool: {
-        redhat:  '/etc/php-fpm.d/override.conf',
-        ubuntu:  '/etc/php5/fpm/pool.d/override.conf',
-        other:   '/etc/php5/fpm/pool.d/override.conf'
-      },
-      fpm_service_name: {
-        redhat:  'php-fpm',
-        ubuntu:  'php5-fpm',
-        other:   'php5-fpm'
-      },
-      fpm_socket: {
-        redhat:  '/var/run/php-fpm-override.sock',
-        ubuntu:  '/var/run/php-fpm-override.sock',
-        other:   '/var/run/php-fpm-override.sock'
+      override: {
+        docroot:                '/var/www/override',
+        default_site:           '/etc/nginx/sites-available/override.conf',
+        default_site_enabled:   '/etc/nginx/sites-enabled/override.conf'
       }
     }
   }
-  suite_data
+  data
 end
 
-def common_family_values
-  common_data = {
-    nginx:               '/usr/sbin/nginx',
-    nginx_service_name:  'nginx'
-  }
-  common_data
-end
-
-def suite_family_value(suite, attribute, family)
-  suite_family_values[suite][attribute][family]
-end
-
-def common_family_value(attribute)
-  common_family_values[attribute]
+def get_helper_data_value(suite, attribute)
+  # Return the attribute requested for this suite from most specific to less specific
+  # >Family>Release>Suite>Attribute
+  return helper_data[os[:family].to_sym][os[:release]][suite][attribute] unless helper_data[os[:family].to_sym][os[:release]][suite][attribute].nil?
+  # >Family>Release>Common>Attribute
+  return helper_data[os[:family].to_sym][os[:release]][:common][attribute] unless helper_data[os[:family].to_sym][os[:release]][:common][attribute].nil?
+  # >Family>Common>Suite>Attribute
+  return helper_data[os[:family].to_sym][:common][suite][attribute] unless helper_data[os[:family].to_sym][:common][suite][attribute].nil?
+  # >Family>Common>Attribute
+  return helper_data[os[:family].to_sym][:common][attribute] unless helper_data[os[:family].to_sym][:common][attribute].nil?
+  # >Common>Suite>Attribute
+  return helper_data[:common][suite][attribute] unless helper_data[:common][suite][attribute].nil?
+  # >Common>Attribute
+  return helper_data[:common][attribute] unless helper_data[:common][attribute].nil?
 end
 
 def page_returns(url = 'http://localhost:80/', host = 'localhost', ssl = false)
