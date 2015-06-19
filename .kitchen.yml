@@ -20,6 +20,9 @@ suites:
   - name: default
     run_list:
       - recipe[rackspace_nginx_php_test::default]
+  - name: default_override
+    run_list:
+      - recipe[rackspace_nginx_php_test::override]      
   - name: php54
     run_list:
       - recipe[rackspace_nginx_php_test::default]
