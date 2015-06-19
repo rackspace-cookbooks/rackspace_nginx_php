@@ -9,7 +9,7 @@ You can disable the installation of php packages with `node['rackspace_nginx_php
 
 ## Supported Platforms
 
-* Centos 6.5
+* Centos 6.6
 * Ubuntu 12.04
 * Ubuntu 14.04 [(only PHP 5.5 and 5.6)](https://github.com/oerdnj/deb.sury.org/issues/58#issuecomment-92246112)
 
@@ -161,4 +161,4 @@ end
 
 ## License and Authors
 
-Authors:: Kostas Georgakopoulos (kostas.georgakopoulos@rackspace.co.uk), Julien Berard (julien.berard@rackspace.com)
+Authors:: Kostas Georgakopoulos (kostas.georgakopoulos@rackspace.co.uk), Julien Berard (julien.berard@rackspace.co.uk)

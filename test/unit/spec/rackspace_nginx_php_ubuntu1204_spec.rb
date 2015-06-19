@@ -1,15 +1,10 @@
 require_relative 'spec_helper'
+require_relative 'ubuntu1204_options'
 
 describe 'rackspace_nginx_php_test::default on Ubuntu 12.04' do
   before do
     stub_resources
   end
-
-  UBUNTU1204_SERVICE_OPTS = {
-    log_level: LOG_LEVEL,
-    platform: 'ubuntu',
-    version: '12.04'
-  }
 
   context 'Nginx' do
     cached(:chef_run) do
