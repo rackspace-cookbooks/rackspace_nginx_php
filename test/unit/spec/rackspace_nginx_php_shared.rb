@@ -21,7 +21,7 @@ shared_examples_for 'Nginx' do |enabled_suite, disabled_suite|
       "access_log    /var/log/nginx/#{enabled_suite}.access.log;",
       "error_log     /var/log/nginx/#{enabled_suite}.error.log;",
       'location / {',
-      'index   index.html index.htm;',
+      'index   index.php index.html index.htm;',
       'location ~* \.php$ {',
       'try_files       $uri = 404;',
       'include         fastcgi_params;',
