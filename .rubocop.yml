@@ -42,7 +42,12 @@ WordArray:
 UnusedBlockArgument:
   Enabled: false
 
+# Allow extra spaces in hash definitions
+ExtraSpacing:
+  Enabled: false
+
 AllCops:
   Include:
     - '**/metadata.rb'
     - '**/*.rb'
+
