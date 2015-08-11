@@ -23,7 +23,7 @@ def helper_data
           fpm_socket:           '/var/run/php-fpm-override.sock'
         },
         common: {
-          fpm_service_name:      'php-fpm'
+          fpm_service_name:     'php-fpm'
         }
       },
       common: {
