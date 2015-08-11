@@ -1,6 +1,10 @@
 rackspace_nginx_php CHANGELOG
 ==================
 
+0.0.4
+-----
+- Fix for rubocop tests
+
 0.0.3
 -----
 - Improvements on integration tests
