@@ -1,6 +1,10 @@
 rackspace_nginx_php CHANGELOG
 ==================
 
+0.0.5
+-----
+- Support for CentOS 6.7 instead of 6.6
+
 0.0.4
 -----
 - Fix for rubocop tests

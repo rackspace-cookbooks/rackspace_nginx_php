@@ -9,7 +9,7 @@ You can disable the installation of php packages with `node['rackspace_nginx_php
 
 ## Supported Platforms
 
-* Centos 6.6
+* Centos 6.7
 * Ubuntu 12.04
 * Ubuntu 14.04 [(only PHP 5.5 and 5.6)](https://github.com/oerdnj/deb.sury.org/issues/58#issuecomment-92246112)
 
@@ -52,17 +52,17 @@ You can change any of the `nginx`,`php-fpm` and `php` cookbook attributes to tun
 
 The goal of this library is to do the basic configuration to serve PHP pages through Nginx. It will only configure `Nginx` and a default site and pool, users are free to use that or disable it and create their own Nginx sites and PHP-FPM pools.
 
-More in details it : 
+More in details it :
 
 * Installs and configure Nginx web server
 * Installs and configure php-fpm
 * Installs and configure php
 * Configures Nginx to serve php pages through php-fpm
-* Gets the correct packages and change the configuration according to the php version 
+* Gets the correct packages and change the configuration according to the php version
 
 ## Out of scope
 
-Virtual Host are not managed by this cookbook, the configuration provided by this cookbook should not prevent users to extend php or php-fpm configuration. 
+Virtual Host are not managed by this cookbook, the configuration provided by this cookbook should not prevent users to extend php or php-fpm configuration.
 As many features as possible should have a flag to enable/disable them, it will allow to enjoy some parts of the work done by this cookbook (get the correct packages by example) but still be able to configure your own php-fpm pools.
 
 
@@ -83,7 +83,7 @@ include_recipe 'rackspace_nginx_php::default'
 #### Nginx and PHP 5.6 without the default Nginx site and PHP-FPM pool - Using attribute from upstream to define the pool
 
 You will have to add your own Nginx site and PHP-FPM pool, here is an example using the upstream PHP-FPM attributes for the pool and a custom template for the Nginx site.
- 
+
 ```
 node.default['rackspace_nginx_php']['nginx']['default_site']['enable'] = false
 node.default['rackspace_nginx_php']['php-fpm']['default_pool']['enable'] = false
@@ -117,7 +117,7 @@ end
 #### Nginx and PHP 5.6 without the default Nginx site and PHP-FPM pool - Using the php_fpm_pool definition to add a pool
 
 You will have to add your own Nginx site and PHP-FPM pool, here is an example using the upstream PHP-FPM definition for the pool and a custom template for the Nginx site.
- 
+
 ```
 node.default['rackspace_nginx_php']['nginx']['default_site']['enable'] = false
 node.default['rackspace_nginx_php']['php-fpm']['default_pool']['enable'] = false
