@@ -28,18 +28,6 @@ describe 'rackspace_nginx_php_test::override on Ubuntu 12.04' do
     it_behaves_like 'PHP-fpm packages without PHP packages, version 5.6 UBUNTU'
   end
 
-  context 'PHP 5.4' do
-    cached(:chef_run) do
-      ChefSpec::SoloRunner.new(UBUNTU1204_SERVICE_OPTS) do |node|
-        node.set['rackspace_nginx_php']['php_version'] = '5.4'
-      end.converge('rackspace_nginx_php_test::override')
-    end
-    it_behaves_like 'Nginx', 'override', 'default'
-    it_behaves_like 'PHP-FPM', 'ubuntu', 'override'
-    it_behaves_like 'APT php repo', 5.4
-    it_behaves_like 'PHP and PHP-fpm packages version 5.4 UBUNTU'
-  end
-
   context 'PHP 5.5' do
     cached(:chef_run) do
       ChefSpec::SoloRunner.new(UBUNTU1204_SERVICE_OPTS) do |node|
