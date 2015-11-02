@@ -16,7 +16,12 @@ You can disable the installation of php packages with `node['rackspace_nginx_php
 
 * Centos 6.7
 * Ubuntu 12.04
-* Ubuntu 14.04 [(only PHP 5.5 and 5.6)](https://github.com/oerdnj/deb.sury.org/issues/58#issuecomment-92246112)
+* Ubuntu 14.04
+
+## Supported PHP versions
+
+* 5.5
+* 5.6
 
 ## Attributes
 
