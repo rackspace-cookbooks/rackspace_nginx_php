@@ -1,6 +1,12 @@
 rackspace_nginx_php CHANGELOG
 ==================
 
+1.0.0
+-----
+- Release as v1.0.0
+- Dropped support for PHP 5.4
+- Updated unit tests
+
 0.0.5
 -----
 - Support for CentOS 6.7 instead of 6.6
