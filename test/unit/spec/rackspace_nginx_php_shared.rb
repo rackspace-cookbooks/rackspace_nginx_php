@@ -36,7 +36,7 @@ shared_examples_for 'Nginx' do |enabled_suite, disabled_suite|
     expect(chef_run).to_not render_file("/etc/nginx/sites-available/#{disabled_suite}.conf")
   end
   it 'enables the site' do
-    expect(chef_run).to enable_nginx_site("#{enabled_suite}")
+    expect(chef_run).to enable_nginx_site(enabled_suite)
   end
 end
 
